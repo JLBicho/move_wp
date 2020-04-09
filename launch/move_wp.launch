@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="move_wp" type="move_wp_node" name="move_wp_node" output="screen"/>
+</launch>
