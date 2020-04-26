@@ -100,6 +100,10 @@ public:
 		if (next_ != poses_.end()){
 			return 1;
 		}else{
+			std::cout<<"[MOVE_WP] Goal succeeded."<<std::endl;
+			std_msgs::String msg_2_send;
+			msg_2_send.data = "success";
+			pub_goal_status_.publish(msg_2_send);
 			std::cout<<"[MOVE WP] End of path reached"<<std::endl;
 			return 0;
 		}
@@ -114,8 +118,8 @@ public:
 
 		ac.waitForResult();
 		if(ac.getState()== actionlib::SimpleClientGoalState::SUCCEEDED){
-			std::cout<<"[MOVE_WP] Goal succeeded."<<std::endl;
 			if (publish_state){
+				std::cout<<"[MOVE_WP] Goal succeeded."<<std::endl;
 				msg_2_send.data = "success";
 				pub_goal_status_.publish(msg_2_send);
 			}
