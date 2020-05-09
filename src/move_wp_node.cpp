@@ -1,8 +1,9 @@
 /* 	
-	Author: Jose Luis Millan Valbuena
-
 	This node is used to follow a path.
 	The movement can be controlled step by step or go autonomous
+	
+
+	Author: Jose Luis Millan Valbuena
 */
 
 /* Libraries */
@@ -34,8 +35,8 @@ public:
 		sub_command_ = nh_.subscribe("/command", 10, &MoveWP::commandCb, this);
 
 		// Publishers
-		pub_next_goal_ = nh_.advertise<geometry_msgs::PoseStamped>("next_goal", 10);
-		pub_goal_status_ = nh_.advertise<std_msgs::String>("goal_status", 10);
+		pub_next_goal_ = nh_.advertise<geometry_msgs::PoseStamped>("/next_goal", 10);
+		pub_goal_status_ = nh_.advertise<std_msgs::String>("/goal_status", 10);
 		
 		// FrameID
 		next_position_.target_pose.header.frame_id = "map";
@@ -60,7 +61,20 @@ public:
 			while(move()){
 				std::cout<<"[MOVE_WP] Moving auto"<<std::endl;
 			}
+		}else if (msg->data=="loop"){
+			go_2_next_ = true;
+			int count = 0;
+			while(count < 3){
+				std::cout<<"Loop "<<count<<std::endl;
+				while(move()){
+					std::cout<<"[MOVE_WP] Moving auto"<<std::endl;
+				}
+
+				count++;
+				next_ = poses_.begin();
+			}
 		}
+		// TO DO: include patrol option: once it reaches the end, same path but backwards (ORIENTATION +pi!)
 	}
 
 	/* Callback to receive the path to follow */
@@ -84,19 +98,22 @@ public:
 				next_position_.target_pose.pose.position = next_->pose.position;	
 				next_position_.target_pose.pose.orientation = next_->pose.orientation;
 				pub_next_goal_.publish(*next_);
-				sendGoal2Base(false);
+				sendGoal2Base(true);
 
 				// Get next position
 				next_++;
 
+				/* DEPRECATED */
 				// Turn robot to face next point
+				/*
 				if (next_!=poses_.end()){
 					next_position_.target_pose.pose.orientation = next_->pose.orientation;
 					sendGoal2Base(true);
 				}
-
+				*/ 
 			}
 		}
+
 		if (next_ != poses_.end()){
 			return 1;
 		}else{
